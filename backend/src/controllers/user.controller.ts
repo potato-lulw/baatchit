@@ -8,5 +8,5 @@ export const getAllUsersController = asyncHandler(async (req, res) => {
   const users = await getUsersService(userId);
   res
     .status(HTTP_STATUS_CODE.OK)
-    .json({ message: "Users fetched successfully", users });
+    .json({ message: "Users fetched successfully", data: users });
 });

@@ -16,9 +16,10 @@ export const createChatController = asyncHandler(
       userId,
       ...body,
     });
-    res
-      .status(HTTP_STATUS_CODE.OK)
-      .json({ message: "Chat created or retrieved successfully", chat });
+    res.status(HTTP_STATUS_CODE.OK).json({
+      message: "Chat created or retrieved successfully",
+      data: chat,
+    });
   },
 );
 
@@ -29,7 +30,7 @@ export const getUserChatsController = asyncHandler(
     const chat = await getUserChatsService(userId);
     res
       .status(HTTP_STATUS_CODE.OK)
-      .json({ message: "Chats retrieved successfully", chat });
+      .json({ message: "Chats retrieved successfully", data: chat });
   },
 );
 
@@ -38,8 +39,9 @@ export const getChatByIdController = asyncHandler(
     const { id } = chatIdSchema.parse(req.params);
     const userId = req.user?._id;
     const { chat, messages } = await getChatByIdService(id, userId);
-    res
-      .status(HTTP_STATUS_CODE.OK)
-      .json({ message: "Chat retrieved successfully", chat, messages });
+    res.status(HTTP_STATUS_CODE.OK).json({
+      message: "Chat retrieved successfully",
+      data: { chat, messages },
+    });
   },
 );
