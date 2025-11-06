@@ -48,7 +48,7 @@ export const initializeSockets = (server: HttpServer) => {
     }
   });
 
-  io.on("connection", (socket: AuthenticatedSocket) => {
+  io.on("connect", (socket: AuthenticatedSocket) => {
     if (!socket.userId) {
       socket.disconnect(true);
       return;
