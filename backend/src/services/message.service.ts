@@ -4,6 +4,11 @@ import Chat from "../models/chat.model";
 import { NotFoundError } from "../utils/app-error";
 import Message from "../models/message.model";
 import { Cloudinary } from "../config/cloudinary.config";
+import mongoose from "mongoose";
+import {
+  emitLastMessageToParticipants,
+  emitNewMessageToChatRoom,
+} from "../lib/sockets";
 
 type SendMessageScemaType = z.infer<typeof sendMessageSchema>;
 
@@ -59,8 +64,18 @@ export const sendMessageService = async (
     },
   ]);
 
+  existingChat.lastMessage = message._id as mongoose.Types.ObjectId;
+  await existingChat.save();
+
   // implement websockets
 
+  // emit the new message to the chat room
+  emitNewMessageToChatRoom(userId, chatId, message);
+
+  // emit last message to members (personal)
+  const participantIds = existingChat.participants.map((id) => id.toString());
+
+  emitLastMessageToParticipants(participantIds, chatId, message);
   return { message, existingChat };
 };
 

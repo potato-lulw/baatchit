@@ -1,7 +1,8 @@
+import { emitNewChatToParticipants } from "../lib/sockets";
 import Chat from "../models/chat.model";
 import Message from "../models/message.model";
 import User from "../models/user.model";
-import { NotFoundError } from "../utils/app-error";
+import { BadRequestError, NotFoundError } from "../utils/app-error";
 
 type createChatType = {
   userId: string;
@@ -38,6 +39,12 @@ export const createChatService = async (body: createChatType) => {
   }
 
   // implement sockets
+  const populatedChat = await chat?.populate("participants", "name avatar");
+  const participantIdString = populatedChat?.participants.map((participant) =>
+    participant._id.toString(),
+  );
+
+  emitNewChatToParticipants(participantIdString, populatedChat);
 
   return chat;
 };
@@ -83,4 +90,17 @@ export const getChatByIdService = async (chatId: string, userId: string) => {
     chat,
     messages,
   };
+};
+
+export const validateChatParticipants = async (
+  chatId: string,
+  userId: string,
+) => {
+  const chat = await Chat.findOne({
+    _id: chatId,
+    participants: { $in: [userId] },
+  });
+
+  if (!chat)
+    throw new BadRequestError("You are not a participant of this chat");
 };

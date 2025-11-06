@@ -10,8 +10,15 @@ import connectDB from "./config/database.config";
 import { errorHandler } from "./middlewares/errorHandler.middleware";
 import "./config/passport.config";
 import routes from "./routes";
+import http from "http";
+import { initializeSockets } from "./lib/sockets";
 
 const app = express();
+const server = http.createServer(app);
+
+// initalize sockets
+
+initializeSockets(server);
 
 app.use(express.json({ limit: "10mb" }));
 app.use(cookieParser());
@@ -40,7 +47,7 @@ app.use(errorHandler);
 const startServer = async () => {
   try {
     await connectDB();
-    app.listen(Env.PORT, () => {
+    server.listen(Env.PORT, () => {
       console.log(`✅ Server is running on port ${Env.PORT}`);
     });
   } catch (error) {
